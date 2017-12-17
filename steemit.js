@@ -1,11 +1,15 @@
-//if($.browser.mozilla)
-  // netscape.security.PrivilegeManager.enablePrivilege('UniversalBrowserRead');
+var steemPrice;
+var sbdPrice;
 
 function updateStyle(){
+	var timestamps = document.getElementsByClassName('timestamp__link');
 	var footers = document.getElementsByClassName('articles__summary-footer');
 	for(var i = 0; i < footers.length; i++)
 	{
-		footers[i].style.border = "5px solid red";
+		var isPowered = timestamps[i].childElementCount == 2;
+		if(!isPowered)
+			footers[i].style.border = "5px solid red";
+		else footers[i].style.border = "5px solid blue";
 	}
 }
 
@@ -14,10 +18,20 @@ function getPrice(crypto, currency)
 	var url = 'https://api.coinmarketcap.com/v1/ticker/' + crypto + '/?convert=' + currency;
 	var method = 'GET';
 	var xhr = createCORSRequest(method, url);
-
 	xhr.onload = function() {
 	  // Success code goes here.
-		return JSON.parse(xhr.responseText)[0]["price_usd"];
+		var price = JSON.parse(xhr.responseText)[0]["price_usd"];
+
+		if(crypto == 'steem')
+			steemPrice = price;
+		else if(crypto == 'steem-dollars')
+			sbdPrice = price;
+
+			if(steemPrice != undefined && sbdPrice != undefined)
+			{
+					updateStyle();
+					updateWallet();
+			}
 	};
 
 	xhr.onerror = function() {
@@ -27,7 +41,6 @@ function getPrice(crypto, currency)
 	};
 	xhr.send();
 }
-
 
 var createCORSRequest = function(method, url) {
   var xhr = new XMLHttpRequest();
@@ -45,6 +58,17 @@ var createCORSRequest = function(method, url) {
   return xhr;
 }
 
+function updateWallet()
+{
+	var userWallet = document.getElementsByClassName('UserWallet');
+	console.log(userWallet);
+	if(userWallet == undefined)
+		return;
 
-updateStyle();
-var price = getPrice("STEEM", "USD");
+	var sbd = userWallet[0].children[3].children[0].children[0];
+	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", '$' + sbdPrice + ' USD');
+	console.log(sbd);
+}
+
+getPrice('steem', 'USD');
+getPrice('steem-dollars', 'USD');
