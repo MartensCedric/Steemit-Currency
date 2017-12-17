@@ -8,6 +8,10 @@
     "48": "icons/border-48.png"
   },
 
+"permissions": [
+"*://*.coinmarketcap.com/*"
+    ],
+
   "content_scripts": [
     {
       "matches": ["*://*.steemit.com/*"],
