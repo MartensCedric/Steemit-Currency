@@ -1,0 +1,19 @@
+{
+
+  "description": "Displays the local currency on Steemit",
+  "manifest_version": 2,
+  "name": "Steem local currency display",
+  "version": "1.0",
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.steemit.com/*"],
+      "js": ["steemit.js"]
+    }
+  ]
+
+}
+
