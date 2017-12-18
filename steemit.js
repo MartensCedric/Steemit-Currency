@@ -1,10 +1,19 @@
 var steemPrice;
 var sbdPrice;
+var userLang = navigator.language || navigator.userLanguage;
 
 function updateStyle(){
 	var timestamps = document.getElementsByClassName('timestamp__link');
 	var footers = document.getElementsByClassName('articles__summary-footer');
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
+
+	if(dropDownMenus.length === footers.length + 1)
+	{
+			dropDownMenus = Array.prototype.slice.call(dropDownMenus).slice(1);
+			console.log(dropDownMenus);
+			console.log(footers);
+	}
+
 
 	for(var i = 0; i < footers.length; i++)
 	{
@@ -23,29 +32,43 @@ function updateStyle(){
     if(reward.childElementCount != 3)
 			reward = reward.children[0];
 
+
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
-
+		console.log(reward);
+		console.log(steemreward);
 		//If there's a a dropdown (The price is atleast $0.00)
 		if(dropDownMenus[i].childElementCount != 0)
 		{
+			console.log(reward);
+			console.log(dropDownMenus[i]);
 			//Not paid yet
-			if(dropDownMenus[i].childElementCount == 2)
+			if(dropDownMenus[i].childElementCount === 2)
 			{
+				console.log(reward);
+				console.log('Not paid yet : ' + steemreward);
 				var curationEstPayout = 0.25 * +steemreward;
 				var authorEstPayout = 0.75 * +steemreward;
 				var sbd = isPowered ? 0.00 : authorEstPayout/2.00;
 				sbd *= sbdPrice;
 				var sp = isPowered ? authorEstPayout : authorEstPayout/(2.00 * steemPrice); //Not exactly correct
-
+				console.log(reward);
 				authorEstPayout = +sbd + +sp;
 				var totalPayout = +curationEstPayout + +authorEstPayout;
 				totalPayout = totalPayout.toFixed(2);
+				console.log(totalPayout);
+				console.log(reward);
 				var pendingPayoutNode = dropDownMenus[i].children[0].children[0].childNodes[1];
-				var endPayout = pendingPayoutNode.nodeValue.split('$')[1];
 
-				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue.replace(endPayout, totalPayout + ' USD');
+				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = totalPayout + ' USD';
+
+				var totalInteger = Math.trunc(totalPayout);
+				var totalDecimal = getDecimal(totalPayout);
+
+				reward.children[1].innerText = totalInteger;
+				reward.children[2].innerText = '.' + totalDecimal + ' USD';
+
 			}else{
 
 					var payoutTemp = dropDownMenus[i].children[0].children[0].childNodes[1];
