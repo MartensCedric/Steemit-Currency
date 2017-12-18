@@ -25,18 +25,29 @@ function updateStyle(){
 
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
-		reward = integer + decimal;
-		console.log(reward);
+		var steemreward = integer + decimal;
 
+		//If there's a a dropdown (The price is atleast $0.00)
 		if(dropDownMenus[i].childElementCount != 0)
 		{
 			//Not paid yet
 			if(dropDownMenus[i].childElementCount == 2)
 			{
-				console.log('Not paid yet!');
+				var curationEstPayout = 0.25 * +steemreward;
+				var authorEstPayout = 0.75 * +steemreward;
+				var sbd = isPowered ? 0.00 : authorEstPayout/2.00;
+				sbd *= sbdPrice;
+				var sp = isPowered ? authorEstPayout : authorEstPayout/(2.00 * steemPrice); //Not exactly correct
+
+				authorEstPayout = +sbd + +sp;
+				var totalPayout = +curationEstPayout + +authorEstPayout;
+				totalPayout = totalPayout.toFixed(2);
+				var pendingPayoutNode = dropDownMenus[i].children[0].children[0].childNodes[1];
+				var endPayout = pendingPayoutNode.nodeValue.split('$')[1];
+
+				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue.replace(endPayout, totalPayout + ' USD');
 			}else{
 
-					console.log(dropDownMenus[i].children[0].children[0].childNodes[1]);
 					var payoutTemp = dropDownMenus[i].children[0].children[0].childNodes[1];
 					var payout = payoutTemp.nodeValue;
 
@@ -50,32 +61,34 @@ function updateStyle(){
 					var endAuthor = author.split('$')[1];
 					var endCuration = curation.split('$')[1];
 
-					console.log('After split');
-
 					var sbd = isPowered ? 0.00 : endAuthor/2.00;
 					sbd *= sbdPrice;
 					var sp = isPowered ? endAuthor : endAuthor/(2.00 * steemPrice); //Not exactly correct
 
-					console.log(sbd);
-					console.log(endCuration);
-					console.log(sp);
 					var totalValue = +sbd + +endCuration + +sp;
-					console.log(totalValue);
-					totalValue = totalValue.toFixed(2);
-					console.log(totalValue);
 
-					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, sbd.toFixed(2) + ' USD');
+					totalValue = totalValue.toFixed(2);
+
+					var totalInteger = Math.trunc(totalValue);
+					var totalDecimal = getDecimal(totalValue);
+
+					reward.children[1].innerText = totalInteger;
+					reward.children[2].innerText = '.' + totalDecimal + ' USD';
+
+					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, (+sbd + +sp).toFixed(2) + ' USD');
 					curationTemp.nodeValue = curationTemp.nodeValue.replace(endCuration, endCuration + ' USD');
 					payoutTemp.nodeValue = payoutTemp.nodeValue.replace(endPayout, totalValue + ' USD');
-
-					//TODO SP
-					console.log(endAuthor);
-					console.log('SBD : ' + sbd);
-					console.log('SP : ' + sp);
-					console.log(endCuration);
 			}
 		}
 	}
+}
+
+function getDecimal(number)
+{
+	var nstring = (number + ""),
+	    narray  = nstring.split("."),
+	    result  = ( narray.length > 1 ? narray[1] : "0" );
+			return result;
 }
 
 function getPrice(crypto, currency)
