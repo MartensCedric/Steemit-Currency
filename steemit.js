@@ -13,6 +13,10 @@ function updateStyle(){
 			footers[i].style.border = "5px solid red";
 		else footers[i].style.border = "5px solid blue";
 
+		//TODO REMOVE
+		if(isPowered)
+			continue;
+
 		var reward = footers[i].children[0].children[0]
 								.children[1].children[0].children[0];
 
@@ -31,18 +35,40 @@ function updateStyle(){
 			{
 				console.log('Not paid yet!');
 			}else{
+
+					console.log(dropDownMenus[i].children[0].children[0].childNodes[1]);
+					var payoutTemp = dropDownMenus[i].children[0].children[0].childNodes[1];
+					var payout = payoutTemp.nodeValue;
+
 					var authorTemp = dropDownMenus[i].children[1].children[0].childNodes[1];
 					var author = authorTemp.nodeValue;
-					var curation = dropDownMenus[i].children[2].children[0].childNodes[1].nodeValue;
+
+					var curationTemp = dropDownMenus[i].children[2].children[0].childNodes[1];
+					var curation = curationTemp.nodeValue;
+
+					var endPayout = payout.split('$')[1];
 					var endAuthor = author.split('$')[1];
 					var endCuration = curation.split('$')[1];
+
+					console.log('After split');
 
 					var sbd = isPowered ? 0.00 : endAuthor/2.00;
 					sbd *= sbdPrice;
 					var sp = isPowered ? endAuthor : endAuthor/(2.00 * steemPrice); //Not exactly correct
 
+					console.log(sbd);
+					console.log(endCuration);
+					console.log(sp);
+					var totalValue = +sbd + +endCuration + +sp;
+					console.log(totalValue);
+					totalValue = totalValue.toFixed(2);
+					console.log(totalValue);
 
-					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, sbd.toFixed(2) + " USD");
+					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, sbd.toFixed(2) + ' USD');
+					curationTemp.nodeValue = curationTemp.nodeValue.replace(endCuration, endCuration + ' USD');
+					payoutTemp.nodeValue = payoutTemp.nodeValue.replace(endPayout, totalValue + ' USD');
+
+					//TODO SP
 					console.log(endAuthor);
 					console.log('SBD : ' + sbd);
 					console.log('SP : ' + sp);
