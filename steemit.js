@@ -3,25 +3,32 @@ var sbdPrice;
 var userLang = navigator.language || navigator.userLanguage;
 var footers = document.getElementsByClassName('articles__summary-footer');
 var oldLength = 0;
+var href = window.location.href;
 
+//multiple-currency
+//'Pending' is a solution that only works in english
+//Comments
+//Post footers
+//Clean
 
+/**
+* Updates footers with USD price
+**/
 function updateStyle(footersToUpdate){
 	var timestamps = document.getElementsByClassName('timestamp__link');
-	oldLength += footersToUpdate.length;
+
+	//Drop down menus are where it says "Payout pending..." or "Author : $x.xx..."
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
 
+	//On the feed page there's an extra element that has these classes that we don't want
 	if(dropDownMenus.length === footers.length + 1)
 	{
 			dropDownMenus = Array.prototype.slice.call(dropDownMenus).slice(1);
 	}
 
-	for(var i = 0; i < footers.length; i++)
+	for(var i = oldLength; i < footers.length; i++)
 	{
 		var isPowered = timestamps[i].childElementCount == 2;
-		if(!isPowered)
-			footers[i].style.border = "5px solid red";
-		else footers[i].style.border = "5px solid blue";
-
 		var reward = footers[i].children[0].children[0]
 								.children[1].children[0].children[0];
 
@@ -36,16 +43,16 @@ function updateStyle(footersToUpdate){
 		console.log(steemreward);
 		console.log(reward);
 
-		if(hasClass(reward, 'strikethrough')) //Payout Refused
-			continue;
 		//If there's a a dropdown (The price is atleast $0.00)
-		if(dropDownMenus[i].childElementCount != 0)
+		if(dropDownMenus[i].childElementCount > 1)
 		{
-			console.log(dropDownMenus[i]);
-			//Not paid yet
-			if(dropDownMenus[i].childElementCount === 2)
+			//Now it can either be :
+			//- Not paid yet (pending)
+			//- Paid
+
+			//This obviously does not work for non english version of the website
+			if(dropDownMenus[i].children[0].innerHTML.indexOf("Pending") != -1)
 			{
-				console.log('Not paid yet : ' + steemreward);
 				var curationEstPayout = 0.25 * +steemreward;
 				var authorEstPayout = 0.75 * +steemreward;
 				var sbd = isPowered ? 0.00 : authorEstPayout/2.00;
@@ -65,7 +72,7 @@ function updateStyle(footersToUpdate){
 				reward.children[1].innerText = totalInteger;
 				reward.children[2].innerText = '.' + totalDecimal + ' USD';
 
-			}else{
+			}else{ //Paid payouts
 
 					var payoutTemp = dropDownMenus[i].children[0].children[0].childNodes[1];
 					var payout = payoutTemp.nodeValue;
@@ -100,6 +107,7 @@ function updateStyle(footersToUpdate){
 			}
 		}
 	}
+    oldLength += footersToUpdate.length;
 }
 
 function getDecimal(number)
@@ -159,7 +167,6 @@ var createCORSRequest = function(method, url) {
 function updateWallet()
 {
 	var userWallet = document.getElementsByClassName('UserWallet');
-	console.log(userWallet);
 	if(userWallet === undefined || userWallet[0] === undefined)
 		return;
 
@@ -172,17 +179,27 @@ function hasClass(element, cls) {
 }
 
 function checkIfNewPosts() {
-	console.log(footers.length + ' ' + oldLength);
-	if(footers.length != oldLength)
+	if(href != window.location.href)
 	{
-		var newFooters = Array.prototype.slice.call(footers).slice(oldLength);
-		updateStyle(newFooters);
+		href = window.location.href;
+		oldLength = 0;
+		if(footers.length != 0)
+			updateStyle(footers);
+	}else if(footers.length > 0 && oldLength == 0)
+	{
+			updateStyle(footers);
+	}else{
+		if(footers.length > oldLength)
+		{
+			var newFooters = Array.prototype.slice.call(footers).slice(oldLength);
+			updateStyle(newFooters);
+		}
 	}
 }
 
 function listenNewPosts()
 {
-	setInterval(checkIfNewPosts, 500);
+	setInterval(checkIfNewPosts, 1000);
 }
 
 getPrice('steem', 'USD');
