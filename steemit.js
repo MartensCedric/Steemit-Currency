@@ -1,10 +1,13 @@
 var steemPrice;
 var sbdPrice;
 var userLang = navigator.language || navigator.userLanguage;
+var footers = document.getElementsByClassName('articles__summary-footer');
+var oldLength = 0;
 
-function updateStyle(){
+
+function updateStyle(footersToUpdate){
 	var timestamps = document.getElementsByClassName('timestamp__link');
-	var footers = document.getElementsByClassName('articles__summary-footer');
+	oldLength += footersToUpdate.length;
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
 
 	if(dropDownMenus.length === footers.length + 1)
@@ -123,8 +126,9 @@ function getPrice(crypto, currency)
 
 			if(steemPrice != undefined && sbdPrice != undefined)
 			{
-					updateStyle();
+					updateStyle(footers);
 					updateWallet();
+					listenNewPosts();
 			}
 	};
 
@@ -156,7 +160,7 @@ function updateWallet()
 {
 	var userWallet = document.getElementsByClassName('UserWallet');
 	console.log(userWallet);
-	if(userWallet == undefined)
+	if(userWallet === undefined || userWallet[0] === undefined)
 		return;
 
 	var sbd = userWallet[0].children[3].children[0].children[0];
@@ -165,6 +169,20 @@ function updateWallet()
 
 function hasClass(element, cls) {
   return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+}
+
+function checkIfNewPosts() {
+	console.log(footers.length + ' ' + oldLength);
+	if(footers.length != oldLength)
+	{
+		var newFooters = Array.prototype.slice.call(footers).slice(oldLength);
+		updateStyle(newFooters);
+	}
+}
+
+function listenNewPosts()
+{
+	setInterval(checkIfNewPosts, 500);
 }
 
 getPrice('steem', 'USD');
