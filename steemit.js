@@ -10,10 +10,7 @@ function updateStyle(){
 	if(dropDownMenus.length === footers.length + 1)
 	{
 			dropDownMenus = Array.prototype.slice.call(dropDownMenus).slice(1);
-			console.log(dropDownMenus);
-			console.log(footers);
 	}
-
 
 	for(var i = 0; i < footers.length; i++)
 	{
@@ -22,46 +19,42 @@ function updateStyle(){
 			footers[i].style.border = "5px solid red";
 		else footers[i].style.border = "5px solid blue";
 
-		//TODO REMOVE
-		if(isPowered)
-			continue;
-
 		var reward = footers[i].children[0].children[0]
 								.children[1].children[0].children[0];
 
-    if(reward.childElementCount != 3)
+	    if(reward.childElementCount != 3)
 			reward = reward.children[0];
 
 
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
-		console.log(reward);
+
 		console.log(steemreward);
+		console.log(reward);
+
+		if(hasClass(reward, 'strikethrough')) //Payout Refused
+			continue;
 		//If there's a a dropdown (The price is atleast $0.00)
 		if(dropDownMenus[i].childElementCount != 0)
 		{
-			console.log(reward);
 			console.log(dropDownMenus[i]);
 			//Not paid yet
 			if(dropDownMenus[i].childElementCount === 2)
 			{
-				console.log(reward);
 				console.log('Not paid yet : ' + steemreward);
 				var curationEstPayout = 0.25 * +steemreward;
 				var authorEstPayout = 0.75 * +steemreward;
 				var sbd = isPowered ? 0.00 : authorEstPayout/2.00;
 				sbd *= sbdPrice;
 				var sp = isPowered ? authorEstPayout : authorEstPayout/(2.00 * steemPrice); //Not exactly correct
-				console.log(reward);
+
 				authorEstPayout = +sbd + +sp;
 				var totalPayout = +curationEstPayout + +authorEstPayout;
 				totalPayout = totalPayout.toFixed(2);
-				console.log(totalPayout);
-				console.log(reward);
-				var pendingPayoutNode = dropDownMenus[i].children[0].children[0].childNodes[1];
 
-				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = totalPayout + ' USD';
+				var pendingPayoutNode = dropDownMenus[i].children[0].children[0].childNodes[1];
+				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = 'Estimated : $' + totalPayout + ' USD';
 
 				var totalInteger = Math.trunc(totalPayout);
 				var totalDecimal = getDecimal(totalPayout);
@@ -168,7 +161,10 @@ function updateWallet()
 
 	var sbd = userWallet[0].children[3].children[0].children[0];
 	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", '$' + sbdPrice + ' USD');
-	console.log(sbd);
+}
+
+function hasClass(element, cls) {
+  return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 }
 
 getPrice('steem', 'USD');
