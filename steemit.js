@@ -11,6 +11,8 @@ var href = window.location.href;
 //Comments
 //Post footers
 //Adjust price formula
+//upvoting issue
+
 
 /**
 * Updates footers with USD price
@@ -18,7 +20,6 @@ var href = window.location.href;
 function updateStyle(footersToUpdate){
 	//Drop down menus are where it says "Payout pending..." or "Author : $x.xx..."
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
-
 	//On the feed page there's an extra element that has these classes that we don't want
 	if(dropDownMenus.length === footers.length + 1)
 	{
@@ -27,19 +28,18 @@ function updateStyle(footersToUpdate){
 
 	for(var i = oldLength; i < footers.length; i++)
 	{
-		var isPowered = timestamps[i].childElementCount == 2;
-		var reward = footers[i].children[0].children[0]
-								.children[1].children[0].children[0];
-
-	    if(reward.childElementCount != 3)
-				reward = reward.children[0];
-
-			updateDropDownMenu(dropDownMenus[i], reward, isPowered);
-
+			var isPowered = timestamps[i].childElementCount == 2;
+			updateDropDownMenu(dropDownMenus[i], extractReward(footers[i]), isPowered);
 	}
     oldLength += footersToUpdate.length;
 }
 
+function updatePostReward(reward)
+{
+	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
+	//check if its powered
+	updateDropDownMenu(dropDownMenus[0], reward, false);
+}
 
 function updateDropDownMenu(ddm, reward, isPowered)
 {
@@ -91,8 +91,8 @@ function updateDropDownMenu(ddm, reward, isPowered)
 					var sp = isPowered ? endAuthor : endAuthor/(2.00 * steemPrice); //Not exactly correct
 
 					var totalValue = +sbd + +endCuration + +sp;
-
-					updateDollarBox(totalValue.toFixed(2), reward);
+					totalValue = totalValue.toFixed(2);
+					updateDollarBox(totalValue, reward);
 
 					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, (+sbd + +sp).toFixed(2) + ' USD');
 					curationTemp.nodeValue = curationTemp.nodeValue.replace(endCuration, endCuration + ' USD');
@@ -174,6 +174,30 @@ function updateWallet()
 	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", '$' + sbdPrice + ' USD');
 }
 
+function updateComments()
+{
+	var commentFooters = document.getElementsByClassName('Comment__footer');
+	console.log('Updating comments!');
+	console.log(commentFooters.length + ' comments to process!');
+	for(var i = 0; i < commentFooters.length; i++)
+	{
+		console.log('comment start');
+		var reward = commentFooters[i].children[0].children[0].children[0].children[1].children[0].children[0];
+		var ddm = commentFooters[i];
+		console.log(commentFooters[i]);
+		console.log('Current reward ' + reward);
+		if(reward.childElementCount != 3)
+		{
+				console.log('o shit');
+				reward = reward.children[0];
+		}
+
+
+		console.log(reward);
+		//updateDropDownMenu()
+	}
+}
+
 function hasClass(element, cls) {
   return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 }
@@ -183,8 +207,20 @@ function checkIfNewPosts() {
 	{
 		href = window.location.href;
 		oldLength = 0;
+
+		var postFooters = document.getElementsByClassName('PostFull__footer row');
 		if(footers.length != 0)
+		{
 			updateStyle(footers);
+		}else if(postFooters.length != 0){
+
+      updatePostReward(postFooters[0].children[0].children[1].children[0]
+																.children[1].children[0]
+																.children[0].children[0]);
+
+      updateComments();
+		}
+
 	}else if(footers.length > 0 && oldLength == 0)
 	{
 			updateStyle(footers);
@@ -195,6 +231,17 @@ function checkIfNewPosts() {
 			updateStyle(newFooters);
 		}
 	}
+}
+
+function extractReward(footer)
+{
+		var reward = footer.children[0].children[0]
+							.children[1].children[0].children[0];
+
+		if(reward.childElementCount != 3)
+			reward = reward.children[0];
+
+		return reward;
 }
 
 function listenNewPosts()
