@@ -2,6 +2,7 @@ var steemPrice;
 var sbdPrice;
 var userLang = navigator.language || navigator.userLanguage;
 var footers = document.getElementsByClassName('articles__summary-footer');
+var timestamps = document.getElementsByClassName('timestamp__link');
 var oldLength = 0;
 var href = window.location.href;
 
@@ -9,14 +10,12 @@ var href = window.location.href;
 //'Pending' is a solution that only works in english
 //Comments
 //Post footers
-//Clean
+//Adjust price formula
 
 /**
 * Updates footers with USD price
 **/
 function updateStyle(footersToUpdate){
-	var timestamps = document.getElementsByClassName('timestamp__link');
-
 	//Drop down menus are where it says "Payout pending..." or "Author : $x.xx..."
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
 
@@ -33,25 +32,30 @@ function updateStyle(footersToUpdate){
 								.children[1].children[0].children[0];
 
 	    if(reward.childElementCount != 3)
-			reward = reward.children[0];
+				reward = reward.children[0];
+
+			updateDropDownMenu(dropDownMenus[i], reward, isPowered);
+
+	}
+    oldLength += footersToUpdate.length;
+}
 
 
+function updateDropDownMenu(ddm, reward, isPowered)
+{
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
 
-		console.log(steemreward);
-		console.log(reward);
-
 		//If there's a a dropdown (The price is atleast $0.00)
-		if(dropDownMenus[i].childElementCount > 1)
+		if(ddm.childElementCount > 1)
 		{
 			//Now it can either be :
 			//- Not paid yet (pending)
 			//- Paid
 
 			//This obviously does not work for non english version of the website
-			if(dropDownMenus[i].children[0].innerHTML.indexOf("Pending") != -1)
+			if(ddm.children[0].innerHTML.indexOf("Pending") != -1)
 			{
 				var curationEstPayout = 0.25 * +steemreward;
 				var authorEstPayout = 0.75 * +steemreward;
@@ -63,24 +67,19 @@ function updateStyle(footersToUpdate){
 				var totalPayout = +curationEstPayout + +authorEstPayout;
 				totalPayout = totalPayout.toFixed(2);
 
-				var pendingPayoutNode = dropDownMenus[i].children[0].children[0].childNodes[1];
+				var pendingPayoutNode = ddm.children[0].children[0].childNodes[1];
 				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = 'Estimated : $' + totalPayout + ' USD';
 
-				var totalInteger = Math.trunc(totalPayout);
-				var totalDecimal = getDecimal(totalPayout);
-
-				reward.children[1].innerText = totalInteger;
-				reward.children[2].innerText = '.' + totalDecimal + ' USD';
-
+				updateDollarBox(totalPayout, reward);
 			}else{ //Paid payouts
 
-					var payoutTemp = dropDownMenus[i].children[0].children[0].childNodes[1];
+					var payoutTemp = ddm.children[0].children[0].childNodes[1];
 					var payout = payoutTemp.nodeValue;
 
-					var authorTemp = dropDownMenus[i].children[1].children[0].childNodes[1];
+					var authorTemp = ddm.children[1].children[0].childNodes[1];
 					var author = authorTemp.nodeValue;
 
-					var curationTemp = dropDownMenus[i].children[2].children[0].childNodes[1];
+					var curationTemp = ddm.children[2].children[0].childNodes[1];
 					var curation = curationTemp.nodeValue;
 
 					var endPayout = payout.split('$')[1];
@@ -93,21 +92,22 @@ function updateStyle(footersToUpdate){
 
 					var totalValue = +sbd + +endCuration + +sp;
 
-					totalValue = totalValue.toFixed(2);
-
-					var totalInteger = Math.trunc(totalValue);
-					var totalDecimal = getDecimal(totalValue);
-
-					reward.children[1].innerText = totalInteger;
-					reward.children[2].innerText = '.' + totalDecimal + ' USD';
+					updateDollarBox(totalValue.toFixed(2), reward);
 
 					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, (+sbd + +sp).toFixed(2) + ' USD');
 					curationTemp.nodeValue = curationTemp.nodeValue.replace(endCuration, endCuration + ' USD');
 					payoutTemp.nodeValue = payoutTemp.nodeValue.replace(endPayout, totalValue + ' USD');
 			}
 		}
-	}
-    oldLength += footersToUpdate.length;
+}
+
+function updateDollarBox(tv, reward)
+{
+	var totalInteger = Math.trunc(tv);
+	var totalDecimal = getDecimal(tv);
+
+	reward.children[1].innerText = totalInteger;
+	reward.children[2].innerText = '.' + totalDecimal + ' USD';
 }
 
 function getDecimal(number)
