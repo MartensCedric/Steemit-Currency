@@ -46,7 +46,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
-
+		console.log(ddm);
 		//If there's a a dropdown (The price is atleast $0.00)
 		if(ddm.childElementCount > 1)
 		{
@@ -73,6 +73,8 @@ function updateDropDownMenu(ddm, reward, isPowered)
 				updateDollarBox(totalPayout, reward);
 			}else{ //Paid payouts
 
+					console.log('Paid payout');
+					console.log(ddm);
 					var payoutTemp = ddm.children[0].children[0].childNodes[1];
 					var payout = payoutTemp.nodeValue;
 
@@ -134,8 +136,7 @@ function getPrice(crypto, currency)
 
 			if(steemPrice != undefined && sbdPrice != undefined)
 			{
-					updateStyle(footers);
-					updateWallet();
+					updatePage();
 					listenNewPosts();
 			}
 	};
@@ -166,6 +167,7 @@ var createCORSRequest = function(method, url) {
 
 function updateWallet()
 {
+	console.log('Updating wallet');
 	var userWallet = document.getElementsByClassName('UserWallet');
 	if(userWallet === undefined || userWallet[0] === undefined)
 		return;
@@ -183,23 +185,51 @@ function updateComments()
 	{
 		console.log('comment start');
 		var reward = commentFooters[i].children[0].children[0].children[0].children[1].children[0].children[0];
-		var ddm = commentFooters[i];
+		var ddm = commentFooters[i].children[0].children[0].children[0].children[1].children[1];
+		console.log('Comment footer')
 		console.log(commentFooters[i]);
-		console.log('Current reward ' + reward);
+		console.log('DropDownMenu');
+		console.log(ddm)
+		console.log('Current reward : ');
+		console.log(reward);
 		if(reward.childElementCount != 3)
 		{
 				console.log('o shit');
 				reward = reward.children[0];
 		}
 
-
+		console.log('Reward now : ');
 		console.log(reward);
-		//updateDropDownMenu()
+		updateDropDownMenu(ddm, reward, false);
 	}
 }
 
 function hasClass(element, cls) {
   return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+}
+
+function updatePage()
+{
+	console.log('Updating page');
+	var postFooters = document.getElementsByClassName('PostFull__footer row');
+	console.log('Post footers : ' + postFooters.length);
+	console.log('Footers : ' + footers.length);
+
+	if(footers.length != 0)
+	{
+		console.log('Style update on the footers');
+		updateStyle(footers);
+	}else if(postFooters.length != 0){
+
+		console.log('Updating post page');
+		updatePostReward(postFooters[0].children[0].children[1].children[0]
+															.children[1].children[0]
+															.children[0].children[0]);
+		updateComments();
+	}else{
+		console.log('wallet update');
+		updateWallet();
+	}
 }
 
 function checkIfNewPosts() {
@@ -208,18 +238,7 @@ function checkIfNewPosts() {
 		href = window.location.href;
 		oldLength = 0;
 
-		var postFooters = document.getElementsByClassName('PostFull__footer row');
-		if(footers.length != 0)
-		{
-			updateStyle(footers);
-		}else if(postFooters.length != 0){
-
-      updatePostReward(postFooters[0].children[0].children[1].children[0]
-																.children[1].children[0]
-																.children[0].children[0]);
-
-      updateComments();
-		}
+		updatePage();
 
 	}else if(footers.length > 0 && oldLength == 0)
 	{
