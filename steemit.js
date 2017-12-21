@@ -8,8 +8,6 @@ var href = window.location.href;
 
 //multiple-currency
 //'Pending' is a solution that only works in english
-//Comments
-//Post footers
 //Adjust price formula
 //upvoting issue
 
@@ -37,8 +35,9 @@ function updateStyle(footersToUpdate){
 function updatePostReward(reward)
 {
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
-	//check if its powered
-	updateDropDownMenu(dropDownMenus[0], reward, false);
+	var powered = document.getElementsByClassName('Icon steempower');
+	console.log(powered);
+	updateDropDownMenu(dropDownMenus[0], reward, powered.length > 0);
 }
 
 function updateDropDownMenu(ddm, reward, isPowered)
@@ -46,7 +45,6 @@ function updateDropDownMenu(ddm, reward, isPowered)
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
-		console.log(ddm);
 		//If there's a a dropdown (The price is atleast $0.00)
 		if(ddm.childElementCount > 1)
 		{
@@ -73,8 +71,6 @@ function updateDropDownMenu(ddm, reward, isPowered)
 				updateDollarBox(totalPayout, reward);
 			}else{ //Paid payouts
 
-					console.log('Paid payout');
-					console.log(ddm);
 					var payoutTemp = ddm.children[0].children[0].childNodes[1];
 					var payout = payoutTemp.nodeValue;
 
@@ -167,7 +163,6 @@ var createCORSRequest = function(method, url) {
 
 function updateWallet()
 {
-	console.log('Updating wallet');
 	var userWallet = document.getElementsByClassName('UserWallet');
 	if(userWallet === undefined || userWallet[0] === undefined)
 		return;
@@ -179,27 +174,16 @@ function updateWallet()
 function updateComments()
 {
 	var commentFooters = document.getElementsByClassName('Comment__footer');
-	console.log('Updating comments!');
-	console.log(commentFooters.length + ' comments to process!');
 	for(var i = 0; i < commentFooters.length; i++)
 	{
-		console.log('comment start');
 		var reward = commentFooters[i].children[0].children[0].children[0].children[1].children[0].children[0];
 		var ddm = commentFooters[i].children[0].children[0].children[0].children[1].children[1];
-		console.log('Comment footer')
-		console.log(commentFooters[i]);
-		console.log('DropDownMenu');
-		console.log(ddm)
-		console.log('Current reward : ');
-		console.log(reward);
+
 		if(reward.childElementCount != 3)
 		{
-				console.log('o shit');
 				reward = reward.children[0];
 		}
 
-		console.log('Reward now : ');
-		console.log(reward);
 		updateDropDownMenu(ddm, reward, false);
 	}
 }
@@ -210,24 +194,18 @@ function hasClass(element, cls) {
 
 function updatePage()
 {
-	console.log('Updating page');
 	var postFooters = document.getElementsByClassName('PostFull__footer row');
-	console.log('Post footers : ' + postFooters.length);
-	console.log('Footers : ' + footers.length);
 
 	if(footers.length != 0)
 	{
-		console.log('Style update on the footers');
 		updateStyle(footers);
 	}else if(postFooters.length != 0){
 
-		console.log('Updating post page');
 		updatePostReward(postFooters[0].children[0].children[1].children[0]
 															.children[1].children[0]
 															.children[0].children[0]);
 		updateComments();
 	}else{
-		console.log('wallet update');
 		updateWallet();
 	}
 }
