@@ -45,6 +45,9 @@ function updateDropDownMenu(ddm, reward, isPowered)
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
+		console.log(steemreward);
+		steemreward = steemreward.split(",").join("");
+		console.log(steemreward);
 		//If there's a a dropdown (The price is atleast $0.00)
 		if(ddm.childElementCount > 1)
 		{
