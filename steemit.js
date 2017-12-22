@@ -8,14 +8,10 @@ var oldLength = 0;
 var href = window.location.href;
 var currentCurrency = 'USD';
 
-//multiple-currency
-//Adjust price formula
-//upvoting issue
-
 /**
 * Updates footers with currency price
 **/
-function updateStyle(footersToUpdate){
+function updateFooters(footersToUpdate){
 	//Drop down menus are where it says "Payout pending..." or "Author : $x.xx..."
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
 	//On the feed page there's an extra element that has these classes that we don't want
@@ -32,6 +28,10 @@ function updateStyle(footersToUpdate){
     oldLength += footersToUpdate.length;
 }
 
+/**
+*	Updates the reward of a post
+* Reward being the element having Formatted Asset as class
+**/
 function updatePostReward(reward)
 {
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
@@ -39,6 +39,10 @@ function updatePostReward(reward)
 	updateDropDownMenu(dropDownMenus[0], reward, powered.length > 0);
 }
 
+/**
+* Updates the panel that you can toggle by clicking the little arrow
+* Reward being the element having Formatted Asset as class
+**/
 function updateDropDownMenu(ddm, reward, isPowered)
 {
 		var integer = reward.children[1].innerText;
@@ -101,15 +105,22 @@ function updateDropDownMenu(ddm, reward, isPowered)
 		}
 }
 
-function updateDollarBox(tv, reward)
+/**
+*	Updates the dollar box
+* Reward being the element having Formatted Asset as class
+*/
+function updateDollarBox(totalValue, reward)
 {
-	var totalInteger = Math.trunc(tv);
-	var totalDecimal = getDecimal(tv);
+	var totalInteger = Math.trunc(totalValue);
+	var totalDecimal = getDecimal(totalValue);
 
 	reward.children[1].innerText = totalInteger;
 	reward.children[2].innerText = '.' + totalDecimal  + ' ' + currentCurrency;
 }
 
+/**
+* Returns the decimal part of a number
+**/
 function getDecimal(number)
 {
 	var nstring = (number + ""),
@@ -118,6 +129,9 @@ function getDecimal(number)
 			return result;
 }
 
+/**
+* Gets the current price for a crypto in a specified currency
+**/
 function getPrice(crypto, currency)
 {
 	var url = 'https://api.coinmarketcap.com/v1/ticker/' + crypto + '/?convert=' + currency;
@@ -163,6 +177,9 @@ var createCORSRequest = function(method, url) {
   return xhr;
 }
 
+/**
+* Updates the wallet page
+**/
 function updateWallet()
 {
 	var userWallet = document.getElementsByClassName('UserWallet');
@@ -173,6 +190,9 @@ function updateWallet()
 	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", '$' + sbdPrice  + ' ' + currentCurrency);
 }
 
+/**
+* Updates the price of comments
+**/
 function updateComments()
 {
 	var commentFooters = document.getElementsByClassName('Comment__footer');
@@ -190,17 +210,23 @@ function updateComments()
 	}
 }
 
+/**
+*	Returns true if the element has the specified class, false otherwise
+**/
 function hasClass(element, cls) {
   return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
 }
 
+/**
+*	Updates the current page
+**/
 function updatePage()
 {
 	var postFooters = document.getElementsByClassName('PostFull__footer row');
 
 	if(footers.length != 0)
 	{
-		updateStyle(footers);
+		updateFooters(footers);
 	}else if(postFooters.length != 0){
 
 		updatePostReward(postFooters[0].children[0].children[1].children[0]
@@ -212,7 +238,12 @@ function updatePage()
 	}
 }
 
+/**
+* Check if the user interaction has lead to more or different posts
+**/
 function checkIfNewPosts() {
+
+	//If he changed page
 	if(href != window.location.href)
 	{
 		href = window.location.href;
@@ -222,16 +253,17 @@ function checkIfNewPosts() {
 
 	}else if(footers.length > 0 && oldLength == 0)
 	{
-			updateStyle(footers);
-	}else{
-		if(footers.length > oldLength)
-		{
-			var newFooters = Array.prototype.slice.call(footers).slice(oldLength);
-			updateStyle(newFooters);
-		}
+			updateFooters(footers);
+	}else if(footers.length > oldLength) //If the user scrolled down to make new posts appear
+	{
+		var newFooters = Array.prototype.slice.call(footers).slice(oldLength);
+		updateFooters(newFooters);
 	}
 }
 
+/**
+* Extracts the reward from the specified footer
+**/
 function extractReward(footer)
 {
 		var reward = footer.children[0].children[0]
@@ -243,6 +275,9 @@ function extractReward(footer)
 		return reward;
 }
 
+/**
+* Starts listening for user activity
+**/
 function listenNewPosts()
 {
 	setInterval(checkIfNewPosts, 1000);
