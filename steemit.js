@@ -1,19 +1,19 @@
 var steemPrice;
 var sbdPrice;
+var currentCurrency;
 var userLang = navigator.language || navigator.userLanguage;
 var footers = document.getElementsByClassName('articles__summary-footer');
 var timestamps = document.getElementsByClassName('timestamp__link');
 var oldLength = 0;
 var href = window.location.href;
+var currentCurrency = 'USD';
 
 //multiple-currency
-//'Pending' is a solution that only works in english
 //Adjust price formula
 //upvoting issue
 
-
 /**
-* Updates footers with USD price
+* Updates footers with currency price
 **/
 function updateStyle(footersToUpdate){
 	//Drop down menus are where it says "Payout pending..." or "Author : $x.xx..."
@@ -36,7 +36,6 @@ function updatePostReward(reward)
 {
 	var dropDownMenus = document.getElementsByClassName('VerticalMenu menu vertical VerticalMenu');
 	var powered = document.getElementsByClassName('Icon steempower');
-	console.log(powered);
 	updateDropDownMenu(dropDownMenus[0], reward, powered.length > 0);
 }
 
@@ -45,9 +44,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 		var integer = reward.children[1].innerText;
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
-		console.log(steemreward);
 		steemreward = steemreward.split(",").join("");
-		console.log(steemreward);
 		//If there's a a dropdown (The price is atleast $0.00)
 		if(ddm.childElementCount > 1)
 		{
@@ -55,9 +52,11 @@ function updateDropDownMenu(ddm, reward, isPowered)
 			//- Not paid yet (pending)
 			//- Paid
 
-			//This obviously does not work for non english version of the website
-			if(ddm.children[0].innerHTML.indexOf("Pending") != -1)
+			//If it's pending
+			if(ddm.children.length == 2
+				|| ddm.children[2].children[0].childNodes[1].nodeValue.indexOf('$') != -1) //Pending promotion
 			{
+				console.log('in');
 				var curationEstPayout = 0.25 * +steemreward;
 				var authorEstPayout = 0.75 * +steemreward;
 				var sbd = isPowered ? 0.00 : authorEstPayout/2.00;
@@ -69,7 +68,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 				totalPayout = totalPayout.toFixed(2);
 
 				var pendingPayoutNode = ddm.children[0].children[0].childNodes[1];
-				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = 'Estimated : $' + totalPayout + ' USD';
+				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = 'Estimated : $' + totalPayout  + ' ' + currentCurrency;
 
 				updateDollarBox(totalPayout, reward);
 			}else{ //Paid payouts
@@ -95,9 +94,9 @@ function updateDropDownMenu(ddm, reward, isPowered)
 					totalValue = totalValue.toFixed(2);
 					updateDollarBox(totalValue, reward);
 
-					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, (+sbd + +sp).toFixed(2) + ' USD');
-					curationTemp.nodeValue = curationTemp.nodeValue.replace(endCuration, endCuration + ' USD');
-					payoutTemp.nodeValue = payoutTemp.nodeValue.replace(endPayout, totalValue + ' USD');
+					authorTemp.nodeValue = authorTemp.nodeValue.replace(endAuthor, (+sbd + +sp).toFixed(2) + ' ' + currentCurrency);
+					curationTemp.nodeValue = curationTemp.nodeValue.replace(endCuration, endCuration  + ' ' + currentCurrency);
+					payoutTemp.nodeValue = payoutTemp.nodeValue.replace(endPayout, totalValue  + ' ' + currentCurrency);
 			}
 		}
 }
@@ -108,7 +107,7 @@ function updateDollarBox(tv, reward)
 	var totalDecimal = getDecimal(tv);
 
 	reward.children[1].innerText = totalInteger;
-	reward.children[2].innerText = '.' + totalDecimal + ' USD';
+	reward.children[2].innerText = '.' + totalDecimal  + ' ' + currentCurrency;
 }
 
 function getDecimal(number)
@@ -171,7 +170,7 @@ function updateWallet()
 		return;
 
 	var sbd = userWallet[0].children[3].children[0].children[0];
-	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", '$' + sbdPrice + ' USD');
+	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", '$' + sbdPrice  + ' ' + currentCurrency);
 }
 
 function updateComments()
