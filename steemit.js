@@ -49,6 +49,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 		var decimal = reward.children[2].innerText;
 		var steemreward = integer + decimal;
 		steemreward = steemreward.split(",").join("");
+
 		//If there's a a dropdown (The price is atleast $0.00)
 		if(ddm.childElementCount > 1)
 		{
@@ -56,11 +57,12 @@ function updateDropDownMenu(ddm, reward, isPowered)
 			//- Not paid yet (pending)
 			//- Paid
 
-			//If it's pending
-			if(ddm.children.length == 2
+			var payoutDeclined = hasClass(reward, 'strikethrough');
+
+			if(ddm.children.length == 2	|| payoutDeclined
 				|| ddm.children[2].children[0].childNodes[1].nodeValue.indexOf('$') != -1) //Pending promotion
 			{
-				console.log('in');
+				console.log('Pending');
 				var curationEstPayout = 0.25 * +steemreward;
 				var authorEstPayout = 0.75 * +steemreward;
 				var sbd = isPowered ? 0.00 : authorEstPayout/2.00;
@@ -76,7 +78,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 
 				updateDollarBox(totalPayout, reward);
 			}else{ //Paid payouts
-
+					console.log('Paid');
 					var payoutTemp = ddm.children[0].children[0].childNodes[1];
 					var payout = payoutTemp.nodeValue;
 
