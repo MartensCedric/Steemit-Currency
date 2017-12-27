@@ -7,6 +7,7 @@ var timestamps = document.getElementsByClassName('timestamp__link');
 var oldLength = 0;
 var href = window.location.href;
 var currentCurrency = 'USD';
+var currentSymbol = '$';
 
 /**
 * Updates footers with currency price
@@ -100,7 +101,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 					var totalValue = +sbd + +endCuration + +sp;
 					totalValue = totalValue.toFixed(2);
 					updateDollarBox(totalValue, reward);
-				
+
 					authorTemp.nodeValue = authorTemp.nodeValue = 'Author : $' +  (+sbd + +sp).toFixed(2) + ' ' + currentCurrency;
 					curationTemp.nodeValue = curationTemp.nodeValue = 'Curation : $' + endCuration  + ' ' + currentCurrency;
 					payoutTemp.nodeValue = payoutTemp.nodeValue.replace(endPayout, totalValue  + ' ' + currentCurrency);
@@ -142,7 +143,7 @@ function getPrice(crypto, currency)
 	var xhr = createCORSRequest(method, url);
 	xhr.onload = function() {
 	  // Success code goes here.
-		var price = JSON.parse(xhr.responseText)[0]["price_usd"];
+		var price = JSON.parse(xhr.responseText)[0]['price_' + currency.toLowerCase()];
 
 		if(crypto == 'steem')
 			steemPrice = price;
@@ -286,5 +287,18 @@ function listenNewPosts()
 	setInterval(checkIfNewPosts, 1000);
 }
 
-getPrice('steem', 'USD');
-getPrice('steem-dollars', 'USD');
+function onError(error) {
+  console.log(`Error: ${error}`);
+}
+
+function onGot(item) {
+  if (item.currency) {
+    currentCurrency = item.currency;
+  }
+
+	getPrice('steem', currentCurrency);
+	getPrice('steem-dollars', currentCurrency);
+}
+
+var getting = browser.storage.local.get("currency");
+getting.then(onGot, onError);
