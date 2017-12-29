@@ -7,7 +7,8 @@ var timestamps = document.getElementsByClassName('timestamp__link');
 var oldLength = 0;
 var href = window.location.href;
 var currentCurrency = 'USD';
-var currentSymbol = '$';
+var currencyPrefix = '';
+var currencySuffix = '';
 
 /**
 * Updates footers with currency price
@@ -77,7 +78,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 				totalPayout = totalPayout.toFixed(2);
 
 				var pendingPayoutNode = ddm.children[0].children[0].childNodes[1];
-				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = 'Estimated : $' + totalPayout  + ' ' + currentCurrency;
+				pendingPayoutNode.nodeValue = pendingPayoutNode.nodeValue = 'Estimated : ' + currencyPrefix + totalPayout + currencySuffix;
 
 				updateDollarBox(totalPayout, reward);
 			}else{ //Paid payouts
@@ -85,6 +86,7 @@ function updateDropDownMenu(ddm, reward, isPowered)
 					var payout = payoutTemp.nodeValue;
 
 					var authorTemp = ddm.children[1].children[0].childNodes[1];
+
 					var author = authorTemp.nodeValue;
 
 					var curationTemp = ddm.children[2].children[0].childNodes[1];
@@ -93,7 +95,6 @@ function updateDropDownMenu(ddm, reward, isPowered)
 					var endPayout = payout.split('$')[1];
 					var endAuthor = author.split('$')[1];
 					var endCuration = curation.split('$')[1];
-
 					var sbd = isPowered ? 0.00 : endAuthor/2.00;
 					sbd *= sbdPrice;
 					var sp = isPowered ? endAuthor : endAuthor/(2.00 * steemPrice); //Not exactly correct
@@ -102,8 +103,8 @@ function updateDropDownMenu(ddm, reward, isPowered)
 					totalValue = totalValue.toFixed(2);
 					updateDollarBox(totalValue, reward);
 
-					authorTemp.nodeValue = authorTemp.nodeValue = 'Author : $' +  (+sbd + +sp).toFixed(2) + ' ' + currentCurrency;
-					curationTemp.nodeValue = curationTemp.nodeValue = 'Curation : $' + endCuration  + ' ' + currentCurrency;
+					authorTemp.nodeValue = authorTemp.nodeValue = 'Author : ' + currencyPrefix +  (+sbd + +sp).toFixed(2) + currencySuffix;
+					curationTemp.nodeValue = curationTemp.nodeValue = 'Curation : ' + currencyPrefix + endCuration  + currencySuffix;
 					payoutTemp.nodeValue = payoutTemp.nodeValue.replace(endPayout, totalValue  + ' ' + currentCurrency);
 			}
 		}
@@ -118,8 +119,9 @@ function updateDollarBox(totalValue, reward)
 	var totalInteger = Math.trunc(totalValue);
 	var totalDecimal = getDecimal(totalValue);
 
+	reward.children[0].innerText = currencyPrefix;
 	reward.children[1].innerText = totalInteger;
-	reward.children[2].innerText = '.' + totalDecimal  + ' ' + currentCurrency;
+	reward.children[2].innerText = '.' + totalDecimal  + currencySuffix;
 }
 
 /**
@@ -152,6 +154,7 @@ function getPrice(crypto, currency)
 
 			if(steemPrice != undefined && sbdPrice != undefined)
 			{
+					setCurrencyDetails(currentCurrency);
 					updatePage();
 					listenNewPosts();
 			}
@@ -191,7 +194,7 @@ function updateWallet()
 		return;
 
 	var sbd = userWallet[0].children[3].children[0].children[0];
-	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", '$' + sbdPrice  + ' ' + currentCurrency);
+	sbd.innerText = sbd.innerText.replace("$1.00 of STEEM", currencyPrefix + sbdPrice + currencySuffix);
 }
 
 /**
@@ -245,8 +248,8 @@ function updatePage()
 /**
 * Check if the user interaction has lead to more or different posts
 **/
-function checkIfNewPosts() {
-
+function checkIfNewPosts()
+{
 	//If he changed page
 	if(href != window.location.href)
 	{
@@ -298,6 +301,45 @@ function onGot(item) {
 
 	getPrice('steem', currentCurrency);
 	getPrice('steem-dollars', currentCurrency);
+}
+
+function setCurrencyDetails(currency)
+{
+	switch(currency)
+	{
+		case 'USD':
+		currencyPrefix = '$';
+		currencySuffix = ' USD';
+		break;
+		case 'CAD':
+		currencyPrefix = '$';
+		currencySuffix = ' CAD';
+		break;
+		case 'AUD':
+		currencyPrefix = '$';
+		currencySuffix = ' AUD';
+		break;
+		case 'EUR':
+		currencyPrefix = '€';
+		currencySuffix = '';
+		break;
+		case 'GBP':
+		currencyPrefix = '£';
+		currencySuffix = '';
+		break;
+		case 'CNY':
+		currencyPrefix = '¥';
+		currencySuffix = ' CNY';
+		break;
+		case 'JPY':
+		currencyPrefix = '¥';
+		currencySuffix = ' JPY';
+		break;
+		case 'KRW':
+		currencyPrefix = '₩';
+		currencySuffix = '';
+		break;
+	}
 }
 
 var getting = browser.storage.local.get("currency");
